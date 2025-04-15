@@ -1,26 +1,67 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class BankService {
-    private ArrayList<BankAccount> accounts;
+    private List<BankAccount> accounts;
+    private InputUtils inputUtils;
 
+    // default/no-args constructor
     public BankService() {
-        accounts = new ArrayList<>();
+        this.accounts = new ArrayList<>();
+        this.inputUtils = new InputUtils();
     }
 
-    public void createSavingsAccount(String accountNumber, String accountHolderName, double initialDeposit) {
-        SavingsAccount savingsAccount = new SavingsAccount(accountNumber, accountHolderName, initialDeposit);
-        accounts.add(savingsAccount);
-        System.out.println("Savings account created successfully for " + accountHolderName);
+    public void createAccount() {
+        System.out.print("Enter account number: ");
+        String accountNumber = inputUtils.readString();
+        System.out.print("Enter name: ");
+        String accountHolderName = inputUtils.readString();
+        System.out.print("Enter initial balance: ");
+        double balance = inputUtils.readDouble();
+
+        System.out.println("Select account type:");
+        System.out.println("1. Savings Account");
+        System.out.println("2. Current Account");
+        System.out.print("Enter your choice: ");
+        int accountType = inputUtils.readInt();
+
+        switch (accountType) {
+            case 1:
+                accounts.add(new SavingsAccount(accountNumber, accountHolderName, balance));
+                break;
+            case 2:
+                System.out.print("Enter overdraft limit: ");
+                double overdraftLimit = inputUtils.readDouble();
+                accounts.add(new CurrentAccount(accountNumber,accountHolderName, balance, overdraftLimit));
+                break;
+            default:
+                System.out.println("Invalid account type.");
+                break;
+        }
+
+        System.out.println("Account created successfully.");
     }
 
-    public void createCurrentAccount(String accountNumber, String accountHolderName, double initialDeposit) {
-        CurrentAccount currentAccount = new CurrentAccount(accountNumber, accountHolderName, initialDeposit);
-        accounts.add(currentAccount);
-        System.out.println("Current account created successfully for " + accountHolderName);
+    public void depositMoney() {
+        BankAccount account = findAccount();
+        if (account != null) {
+            System.out.println("Enter amount to deposit: ");
+            double amount = inputUtils.readDouble();
+            account.deposit(amount);
+        }
+    }
+
+    public void withdrawMoney() {
+        BankAccount account = findAccount();
+        if (account != null) {
+            System.out.println("Enter amount to withdraw: ");
+            double amount = inputUtils.readDouble();
+            account.withdraw(amount);
+        }
     }
 
     public void listAccounts() {
-        for(BankAccount account: accounts) {
+        for (BankAccount account : accounts) {
             System.out.println("Account Number: " + account.getAccountNumber() +
                     ", Holder: " + account.getAccountHolderName() +
                     ", Balance: $" + account.getBalance());
@@ -28,12 +69,24 @@ public class BankService {
         }
     }
 
-    public BankAccount findAccount(String accountNumber) {
-        for(BankAccount account: accounts) {
+    public void checkBalance() {
+        BankAccount account = findAccount();
+        if (account != null) {
+            System.out.println("Current balance: " + account.getBalance());
+        }
+    }
+
+    private BankAccount findAccount() {
+        System.out.println("Enter account number: ");
+        String accountNumber = inputUtils.readString();
+        for (BankAccount account : accounts) {
             if (account.getAccountNumber().equals(accountNumber)) {
                 return account;
             }
         }
+        System.out.println("Account not found.");
         return null;
     }
+
+
 }
